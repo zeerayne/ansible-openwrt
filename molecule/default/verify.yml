@@ -30,6 +30,7 @@
     - name: Run simple command
       command:
         cmd: "echo Holy canole,    it\\'s {{ os_release.name }}"
+      changed_when: false
       register: holy_canole
 
     - name: Assert Canole
@@ -40,10 +41,10 @@
     - name: Read UCI
       uci:
         command: get
-        key: network.wan.ifname
-      register: uci_wan_ifname
+        key: dhcp.lan.interface
+      register: uci_dhcp_lan_interface
 
     - name: Assert WAN network interface name (UCI)
       ansible.builtin.assert:
         that:
-          - uci_wan_ifname.result == "eth0"
+          - uci_dhcp_lan_interface.result == "lan"

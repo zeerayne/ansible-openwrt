@@ -32,11 +32,10 @@ Compatibility
 -------------
 
 This role was tested successfully with:
- * LEDE 17.01 (manually)
- * OpenWRT 18.06
  * OpenWRT 19.07
  * OpenWRT 21.02
  * OpenWRT 22.03
+ * OpenWRT 23.05
 
 Requirements
 ------------

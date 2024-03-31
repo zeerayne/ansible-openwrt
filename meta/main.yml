@@ -9,6 +9,12 @@ galaxy_info:
   min_ansible_version: '2.4'
   platforms:
     - name: GenericLinux
+    - name: OpenWrt
+      versions:
+        - "19.07"
+        - "21.02"
+        - "22.03"
+        - "23.05"
     # platforms:
     # - name: LEDE
     #   versions:
@@ -25,3 +31,4 @@ galaxy_info:
 dependencies: []
 
 # code: language=yaml tabSize=2
+
