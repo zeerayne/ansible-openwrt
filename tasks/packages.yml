@@ -8,6 +8,7 @@
   when: _opkg_lists.stat.exists
   command:
     cmd: "find {{ openwrt_remote_opkg_lists_dir }} -type f"
+  changed_when: false
   register: _opkg_list_files
 
 - name: get current system time
