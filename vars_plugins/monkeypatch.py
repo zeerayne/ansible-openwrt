@@ -1,4 +1,8 @@
 import os
+try:
+    from ansible.executor.module_common import _BuiltModule
+except ImportError:
+    _BuiltModule = None
 from ansible.plugins.action import ActionBase
 from ansible.plugins.vars import BaseVarsPlugin
 try:
@@ -30,8 +34,16 @@ def _configure_module(self, module_name, module_args, task_vars=None):
             module_name = os.path.basename(openwrt_module)[:-3]
     else:
         openwrt_module = None
-    (module_style, module_shebang, module_data, module_path) = \
-            self.__configure_module(module_name, module_args, task_vars)
+    internal_configured_module = self.__configure_module(module_name, module_args, task_vars)
+    if (len(internal_configured_module) == 4):
+        (module_style, module_shebang, module_data, module_path) = internal_configured_module
+        ansible_is_prior_2_19 = True
+    elif (len (internal_configured_module) == 2):
+        (module_bits, module_path) = internal_configured_module
+        ansible_is_prior_2_19 = False
+        module_data = module_bits.b_module_data
+    else:
+        raise ValueError("Unexpected return value from ActionBase._configure_module; `vars_plugins/monkeypatch.py` needs to be updated.")
     if openwrt_module:
         with open(_wrapper_file, 'r') as f:
             wrapper_data = f.read()
@@ -39,7 +51,15 @@ def _configure_module(self, module_name, module_args, task_vars=None):
             module_data = module_data.decode()
         module_data = wrapper_data.replace('\n. "$_script"\n', '\n' + module_data + '\n')
         _fix_module_args(module_args)
-    return (module_style, module_shebang, module_data, module_path)
+    if ansible_is_prior_2_19:
+        return (module_style, module_shebang, module_data, module_path)
+    else:
+        return (_BuiltModule(
+            b_module_data=module_data,
+            module_style=module_bits.module_style,
+            shebang=module_bits.shebang,
+            serialization_profile=module_bits.serialization_profile,
+        ), module_path)
 
 if ActionBase._configure_module != _configure_module:
     _wrapper_file = os.path.join(os.path.dirname(__file__), '..', 'files', 'wrapper.sh')
