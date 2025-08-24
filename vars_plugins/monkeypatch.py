@@ -1,5 +1,8 @@
 import os
-from ansible.executor.module_common import _BuiltModule
+try:
+    from ansible.executor.module_common import _BuiltModule
+except ImportError:
+    _BuiltModule = None
 from ansible.plugins.action import ActionBase
 from ansible.plugins.vars import BaseVarsPlugin
 try:
@@ -16,7 +19,7 @@ def _fix_module_args(module_args):
         elif isinstance(v, list):
             module_args[k] = [False if i is None else i for i in v]
 
-def _configure_module(self, module_name, module_args, task_vars=None) -> tuple[_BuiltModule, str]:
+def _configure_module(self, module_name, module_args, task_vars=None):
     if task_vars is None:
         task_vars = dict()
     if self._task.delegate_to:
