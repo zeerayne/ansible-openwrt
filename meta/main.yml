@@ -1,10 +1,10 @@
 ---
 galaxy_info:
-  namespace: gekmihesg
+  namespace: zeerayne
   role_name: openwrt
   author: Markus Weippert
   description: Manage OpenWRT without python
-  issue_tracker_url: https://github.com/gekmihesg/ansible-openwrt/issues
+  issue_tracker_url: https://github.com/zeerayne/ansible-openwrt/issues
   license: GPL-3.0
   min_ansible_version: '2.4'
   platforms:
@@ -15,6 +15,7 @@ galaxy_info:
         - "21.02"
         - "22.03"
         - "23.05"
+        - "24.10"
     # platforms:
     # - name: LEDE
     #   versions:

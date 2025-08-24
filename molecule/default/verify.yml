@@ -5,9 +5,10 @@
   hosts: all
   gather_facts: false
   roles:
-    - gekmihesg.openwrt
+    - zeerayne.openwrt
   vars:
     openwrt_install_recommended_packages: false
+    ansible_scp_extra_args: -O
   tasks:
     - name: Retrieve /etc/os-release
       slurp:
