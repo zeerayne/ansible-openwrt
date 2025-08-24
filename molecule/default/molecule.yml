@@ -6,35 +6,42 @@ driver:
   name: docker
 platforms:
   - name: openwrt_latest
-    image: openwrt/rootfs:latest
+    image: openwrt/rootfs:x86_64
     command: sleep infinity
     pre_build_image: true
     network_mode: host
     groups:
       - openwrt
-  - name: openwrt_x86_64-23.05.3
-    image: openwrt/rootfs:x86_64-23.05.3
+  - name: openwrt_x86_64-24.10
+    image: openwrt/rootfs:x86_64-openwrt-24.10
     command: sleep infinity
     pre_build_image: true
     network_mode: host
     groups:
       - openwrt
-  - name: openwrt_x86_64-22.03.2
-    image: openwrt/rootfs:x86_64-22.03.2
+  - name: openwrt_x86_64-23.05
+    image: openwrt/rootfs:x86_64-openwrt-23.05
     command: sleep infinity
     pre_build_image: true
     network_mode: host
     groups:
       - openwrt
-  - name: openwrt_x86_64-21.02.5
-    image: openwrt/rootfs:x86_64-21.02.5
+  - name: openwrt_x86_64-22.03
+    image: openwrt/rootfs:x86_64-openwrt-22.03
     command: sleep infinity
     pre_build_image: true
     network_mode: host
     groups:
       - openwrt
-  - name: openwrt_x86_64-19.07.10
-    image: openwrt/rootfs:x86_64-19.07.10
+  - name: openwrt_x86_64-21.02
+    image: openwrt/rootfs:x86_64-openwrt-21.02
+    command: sleep infinity
+    pre_build_image: true
+    network_mode: host
+    groups:
+      - openwrt
+  - name: openwrt_x86_64-19.07
+    image: openwrt/rootfs:x86_64-openwrt-19.07
     command: "sh -c 'while true; do sleep 10000; done'"
     pre_build_image: true
     network_mode: host

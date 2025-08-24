@@ -15,6 +15,7 @@ galaxy_info:
         - "21.02"
         - "22.03"
         - "23.05"
+        - "24.10"
     # platforms:
     # - name: LEDE
     #   versions:
