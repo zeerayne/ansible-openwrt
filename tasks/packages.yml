@@ -41,7 +41,7 @@
     base64: coreutils-base64
     md5sum: coreutils-md5sum
     sha1sum: coreutils-sha1sum
-  when: _openssl.rc
+  when: _openssl.rc != 0
 
 - name: avoid re-checking of packages
   set_fact:
