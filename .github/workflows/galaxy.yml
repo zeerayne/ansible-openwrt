@@ -11,6 +11,8 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v5
+        with:
+          path: "${{ github.repository }}"
       - name: molecule
         uses: robertdebock/molecule-action@6.0.1
   release:
