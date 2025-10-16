@@ -28,24 +28,188 @@
         _os_release_split: "{{ _os_release_lines | map('regex_search', '^([A-Z_0-9]+)=\"(.*)\"$', '\\1', '\\2') | reject('none') }}"
         _os_release_dict: "{{ dict(_os_release_split) }}"
 
-    - name: Run simple command
-      command:
-        cmd: "echo Holy canole,    it\\'s {{ os_release.name }}"
-      changed_when: false
-      register: holy_canole
+    - name: Test running command
+      block:
 
-    - name: Assert Canole
-      ansible.builtin.assert:
-        that:
-          - holy_canole.stdout.startswith("Holy canole, it's OpenWrt")
+        - name: Run simple command
+          command:
+            cmd: "echo Holy canole,    it\\'s {{ os_release.name }}"
+          changed_when: false
+          register: holy_canole
 
-    - name: Read UCI
-      uci:
-        command: get
-        key: dhcp.lan.interface
-      register: uci_dhcp_lan_interface
+        - name: Assert Canole
+          ansible.builtin.assert:
+            that:
+              - holy_canole.stdout.startswith("Holy canole, it's OpenWrt")
 
-    - name: Assert WAN network interface name (UCI)
-      ansible.builtin.assert:
-        that:
-          - uci_dhcp_lan_interface.result == "lan"
+    - name: Test reading uci
+      block:
+
+        - name: Read UCI
+          uci:
+            command: get
+            key: dhcp.lan.interface
+          register: uci_dhcp_lan_interface
+
+        - name: Assert WAN network interface name (UCI)
+          ansible.builtin.assert:
+            that:
+              - uci_dhcp_lan_interface.result == "lan"
+
+    - name: Test writing uci
+      block:
+
+        - name: Write UCI
+          uci:
+            command: set
+            key: dhcp.@dnsmasq[0]
+            value:
+              rebind_protection: 0
+
+        - name: Read written value UCI
+          uci:
+            command: get
+            key: dhcp.@dnsmasq[0].rebind_protection
+          register: uci_dhcp_dnsmasq_rebind_protection
+
+        - name: Assert rebind_protection value (UCI)
+          ansible.builtin.assert:
+            that:
+              - uci_dhcp_dnsmasq_rebind_protection.result == "0"
+
+    - name: Test service management
+      when:
+        - "'19.07' not in os_release.version"
+        - "'21.02' not in os_release.version"
+      block:
+
+        - name: Disable cron service
+          ansible.builtin.service:
+            name: cron
+            enabled: false
+
+        - name: Check cron enabled
+          command: service cron enabled
+          changed_when: false
+          failed_when: false
+          register: cron_enabled
+
+        - name: Assert cron service status
+          ansible.builtin.assert:
+            that:
+              - cron_enabled.rc != 0
+
+        - name: Enable cron service
+          ansible.builtin.service:
+            name: cron
+            enabled: true
+
+        - name: Check cron enabled
+          command: service cron enabled
+          changed_when: false
+          failed_when: false
+          register: cron_enabled
+
+        - name: Assert cron service status
+          ansible.builtin.assert:
+            that:
+              - cron_enabled.rc == 0
+
+        - name: Stop cron service
+          ansible.builtin.service:
+            name: cron
+            state: stopped
+
+        - name: Check cron running
+          command: service cron running
+          changed_when: false
+          failed_when: false
+          register: cron_state
+
+        - name: Assert cron service state
+          ansible.builtin.assert:
+            that:
+              - cron_state.rc != 0
+
+    - name: Test copy
+      vars:
+        file_content: "{{ os_release.name + ' ' + os_release.version }}"
+        path: /tmp/test_file.molecule
+      block:
+
+        - name: Create file with content
+          copy:
+            content: "{{ file_content }}"
+            dest: "{{ path }}"
+            mode: "644"
+
+        - name: Retrieve file content
+          slurp:
+            src: "{{ path }}"
+          register: test_file_slurp
+
+        - name: Assert file content
+          ansible.builtin.assert:
+            that:
+              - test_file_slurp['content'] | b64decode == file_content
+
+    - name: Test tempfile
+      block:
+
+        - name: Create temp file
+          ansible.builtin.tempfile:
+            state: file
+            prefix: molecule
+          register: test_tempfile
+
+        - name: Get temp file stats
+          ansible.builtin.stat:
+            path: "{{ test_tempfile.path }}"
+          register: test_file_check_result
+
+        - name: Assert temp file exists
+          ansible.builtin.assert:
+            that:
+              - test_file_check_result.stat.exists
+
+        - name: Create temp directory
+          ansible.builtin.tempfile:
+            state: directory
+            prefix: molecule
+          register: test_tempdir
+
+        - name: Get temp dir stats
+          ansible.builtin.stat:
+            path: "{{ test_tempdir.path }}"
+          register: test_dir_check_result
+
+        - name: Assert temp dir exists
+          ansible.builtin.assert:
+            that:
+              - test_dir_check_result.stat.exists
+
+    - name: Test sysctl
+      vars:
+        sysctl_file: /etc/sysctl.conf
+        sysctl_setting_name: fs.file-max
+        sysctl_setting_value: 396480
+      block:
+
+        - name: Set `fs.file-max` with sysctl
+          ansible.posix.sysctl:
+            sysctl_file: "{{ sysctl_file }}"
+            state: present
+            name: "{{ sysctl_setting_name }}"
+            value: "{{ sysctl_setting_value }}"
+
+        - name: Check sysctl setting exists
+          ansible.builtin.lineinfile:
+            path: "{{ sysctl_file }}"
+            line: "{{ sysctl_setting_name + '=' + sysctl_setting_value | string }}"
+          check_mode: true
+          register: sysctl_setting_check
+
+        - name: Assert sysctl setting exists
+          ansible.builtin.assert:
+            that:
+              - sysctl_setting_check.changed == false
