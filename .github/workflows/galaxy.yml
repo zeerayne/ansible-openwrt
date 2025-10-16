@@ -10,20 +10,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
-        uses: actions/checkout@${{ vars.ACTIONS_CHECKOUT_VERSION || 'v5' }}
+        uses: actions/checkout@v5
         with:
           path: "${{ github.repository }}"
       - name: molecule
-        uses: robertdebock/molecule-action@${{ vars.ACTIONS_MOLECULE_VERSION || '6.0.1' }}
+        uses: robertdebock/molecule-action@6.0.1
   release:
     needs:
       - test
     runs-on: ubuntu-latest
     steps:
       - name: checkout
-        uses: actions/checkout@${{ vars.ACTIONS_CHECKOUT_VERSION || 'v5' }}
+        uses: actions/checkout@v5
       - name: galaxy
-        uses: robertdebock/galaxy-action@${{ vars.ACTIONS_GALAXY_VERSION || '1.2.1' }}
+        uses: robertdebock/galaxy-action@1.2.1
         with:
           galaxy_api_key: ${{ secrets.GALAXY_API_KEY }}
           git_branch: master
