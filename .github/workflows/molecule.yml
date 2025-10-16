@@ -1,0 +1,19 @@
+name: Run molecule tests
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@${{ vars.ACTIONS_CHECKOUT_VERSION || 'v5' }}
+        with:
+          path: "${{ github.repository }}"
+      - name: molecule
+        uses: robertdebock/molecule-action@${{ vars.ACTIONS_MOLECULE_VERSION || '6.0.1' }}
