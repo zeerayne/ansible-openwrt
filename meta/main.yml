@@ -16,13 +16,6 @@ galaxy_info:
         - "22.03"
         - "23.05"
         - "24.10"
-    # platforms:
-    # - name: LEDE
-    #   versions:
-    #   - 17.01
-    # - name: OpenWRT
-    #   versions:
-    #   - 15.05
   galaxy_tags:
     - busybox
     - lede
@@ -32,4 +25,3 @@ galaxy_info:
 dependencies: []
 
 # code: language=yaml tabSize=2
-
