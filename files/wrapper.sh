@@ -200,8 +200,14 @@ changed() {
 }
 
 fail() {
-    MESSAGE="$*"
-    exit 1
+    local msg="$1"
+    local code="${2:-1}"
+
+    if [ -n "$msg" ]; then
+        MESSAGE="$msg"
+    fi
+
+    exit "$code"
 }
 
 _result=""

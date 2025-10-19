@@ -54,7 +54,7 @@ main() {
     stdout="$(cat "$out")"
     stderr="$(cat "$err")"
     changed
-    test "$rc" -eq 0 || fail "non-zero return code"
+    test "$rc" -eq 0 || fail "non-zero return code" "$rc"
     return 0
 }
 
