@@ -49,9 +49,8 @@ platforms:
       - openwrt
 provisioner:
   name: ansible
+  config_options:
+    defaults:
+      roles_path: ./
 verifier:
   name: ansible
-lint: |
-  set -e
-  yamllint .
-  ansible-lint .
