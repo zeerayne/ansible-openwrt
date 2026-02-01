@@ -1,6 +1,6 @@
 ---
 - name: pin defaults
-  set_fact:
+  ansible.builtin.set_fact:
     openwrt_ssh: "{{ openwrt_ssh }}"
     openwrt_scp: "{{ openwrt_scp }}"
     openwrt_ssh_user: "{{ openwrt_ssh_user }}"
@@ -31,6 +31,17 @@
     _os_release_lines: "{{ os_release_slurp['content'] | b64decode | split('\n') }}"
     _os_release_split: "{{ _os_release_lines | map('regex_search', '^([A-Z_0-9]+)=\"(.*)\"$', '\\1', '\\2') | reject('none') }}"
     _os_release_dict: "{{ dict(_os_release_split) }}"
+  when: "'openwrt' in group_names"
+
+- name: Check if internet connection is available
+  command: ping -c 1 google.com
+  register: openwrt_internet_connection
+  changed_when: false
+  when: "'openwrt' in group_names"
+
+- name: Set internet connection available fact
+  ansible.builtin.set_fact:
+    openwrt_internet_connection_available: "{{ openwrt_internet_connection.rc == 0 }}"
   when: "'openwrt' in group_names"
 
 - name: install recommended packages (apk)
