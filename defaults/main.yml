@@ -15,3 +15,6 @@ openwrt_ssh_use_tty: false
 openwrt_remote_tmp: /tmp
 
 openwrt_remote_opkg_lists_dir: /tmp/opkg-lists
+openwrt_remote_apk_lists_dir: /var/cache/apk
+
+openwrt_internet_connection_check_host: google.com

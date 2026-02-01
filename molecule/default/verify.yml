@@ -10,23 +10,6 @@
     openwrt_install_recommended_packages: false
     ansible_scp_extra_args: -O
   tasks:
-    - name: Retrieve /etc/os-release
-      slurp:
-        src: /etc/os-release
-      register: os_release_slurp
-
-    - name: Populate fact os_release
-      ansible.builtin.set_fact:
-        os_release: >-
-          {{
-            _os_release_dict.keys() | map('lower')
-            | zip(_os_release_dict.values())
-            | items2dict(key_name=0, value_name=1)
-          }}
-      vars:
-        _os_release_lines: "{{ os_release_slurp['content'] | b64decode | split('\n') }}"
-        _os_release_split: "{{ _os_release_lines | map('regex_search', '^([A-Z_0-9]+)=\"(.*)\"$', '\\1', '\\2') | reject('none') }}"
-        _os_release_dict: "{{ dict(_os_release_split) }}"
 
     - name: Test running command
       block:
@@ -78,9 +61,7 @@
               - uci_dhcp_dnsmasq_rebind_protection.result == "0"
 
     - name: Test service management
-      when:
-        - "'19.07' not in os_release.version"
-        - "'21.02' not in os_release.version"
+      when: "(os_release.version_id | default('snapshot')) == 'snapshot' or (os_release.version_id | default('0') is version('22.03', '>='))"
       block:
 
         - name: Disable cron service
@@ -88,7 +69,7 @@
             name: cron
             enabled: false
 
-        - name: Check cron enabled
+        - name: Check cron enabled  # noqa: command-instead-of-module
           command: service cron enabled
           changed_when: false
           failed_when: false
@@ -104,7 +85,7 @@
             name: cron
             enabled: true
 
-        - name: Check cron enabled
+        - name: Check cron enabled  # noqa: command-instead-of-module
           command: service cron enabled
           changed_when: false
           failed_when: false
@@ -120,7 +101,7 @@
             name: cron
             state: stopped
 
-        - name: Check cron running
+        - name: Check cron running  # noqa: command-instead-of-module
           command: service cron running
           changed_when: false
           failed_when: false

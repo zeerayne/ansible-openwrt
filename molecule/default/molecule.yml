@@ -5,8 +5,8 @@ dependency:
 driver:
   name: docker
 platforms:
-  - name: openwrt_latest
-    image: openwrt/rootfs:x86_64
+  - name: openwrt_x86_64-25.12
+    image: openwrt/rootfs:x86_64-openwrt-25.12
     command: sleep infinity
     pre_build_image: true
     network_mode: host
