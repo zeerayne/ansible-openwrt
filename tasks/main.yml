@@ -34,9 +34,10 @@
   when: "'openwrt' in group_names"
 
 - name: Check if internet connection is available
-  command: ping -c 1 google.com
+  command: "ping -c 1 {{ openwrt_internet_connection_check_host }}"
   register: openwrt_internet_connection
   changed_when: false
+  ignore_errors: true
   when: "'openwrt' in group_names"
 
 - name: Set internet connection available fact
