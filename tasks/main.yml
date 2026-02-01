@@ -50,6 +50,7 @@
     - "'openwrt' in group_names"
     - "openwrt_install_recommended_packages | bool"
     - "(os_release.version_id | default('snapshot')) == 'snapshot' or (os_release.version_id | default('0') is version('25.12', '>='))"
+    - "openwrt_internet_connection_available | bool"
 
 - name: install recommended packages (opkg)
   include_tasks: packages_opkg.yml
@@ -57,3 +58,4 @@
     - "'openwrt' in group_names"
     - "openwrt_install_recommended_packages | bool"
     - "(os_release.version_id | default('snapshot')) != 'snapshot' and (os_release.version_id | default('0') is version('25.12', '<'))"
+    - "openwrt_internet_connection_available | bool"
