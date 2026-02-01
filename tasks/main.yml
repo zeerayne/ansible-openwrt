@@ -13,8 +13,36 @@
   when: "'openwrt' in group_names"
   tags: always
 
-- name: install recommended packages
-  include_tasks: packages.yml
+- name: retrieve /etc/os-release
+  slurp:
+    src: /etc/os-release
+  register: os_release_slurp
+  when: "'openwrt' in group_names"
+
+- name: populate fact os_release
+  ansible.builtin.set_fact:
+    os_release: >-
+      {{
+        _os_release_dict.keys() | map('lower')
+        | zip(_os_release_dict.values())
+        | items2dict(key_name=0, value_name=1)
+      }}
+  vars:
+    _os_release_lines: "{{ os_release_slurp['content'] | b64decode | split('\n') }}"
+    _os_release_split: "{{ _os_release_lines | map('regex_search', '^([A-Z_0-9]+)=\"(.*)\"$', '\\1', '\\2') | reject('none') }}"
+    _os_release_dict: "{{ dict(_os_release_split) }}"
+  when: "'openwrt' in group_names"
+
+- name: install recommended packages (apk)
+  include_tasks: packages_apk.yml
   when:
     - "'openwrt' in group_names"
     - "openwrt_install_recommended_packages | bool"
+    - "(os_release.version_id | default('snapshot')) == 'snapshot' or (os_release.version_id | default('0') is version('25.12', '>='))"
+
+- name: install recommended packages (opkg)
+  include_tasks: packages_opkg.yml
+  when:
+    - "'openwrt' in group_names"
+    - "openwrt_install_recommended_packages | bool"
+    - "(os_release.version_id | default('snapshot')) != 'snapshot' and (os_release.version_id | default('0') is version('25.12', '<'))"

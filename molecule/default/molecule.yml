@@ -12,6 +12,13 @@ platforms:
     network_mode: host
     groups:
       - openwrt
+  - name: openwrt_x86_64-25.12
+    image: openwrt/rootfs:x86_64-openwrt-25.12
+    command: sleep infinity
+    pre_build_image: true
+    network_mode: host
+    groups:
+      - openwrt
   - name: openwrt_x86_64-24.10
     image: openwrt/rootfs:x86_64-openwrt-24.10
     command: sleep infinity

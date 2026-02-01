@@ -1,0 +1,49 @@
+---
+- name: check whether apk caches need update
+  stat:
+    path: "{{ openwrt_remote_apk_lists_dir }}"
+  register: _apk_lists
+
+- name: verify there are actual cache files
+  when: _apk_lists.stat.exists
+  command:
+    cmd: "find {{ openwrt_remote_apk_lists_dir }} -type f"
+  changed_when: false
+  register: _apk_list_files
+
+- name: get current system time
+  command: date +%s
+  register: _epoch
+  check_mode: false
+  changed_when: false
+  when: _apk_lists.stat.exists
+
+- name: update apk cache
+  apk:
+    name: apk
+    update_cache: true
+  register: _update
+  when: not ( _apk_lists.stat.exists and
+    _apk_list_files.stdout is defined and
+    _apk_list_files.stdout|length > 0) or
+    _epoch.stdout|int - _apk_lists.stat.mtime > 86400
+  failed_when: not _apk_lists.stat.exists and _update.failed
+  changed_when: not _update.failed
+
+- name: check for openssl
+  command: which openssl
+  register: _openssl
+  check_mode: false
+  changed_when: false
+  failed_when: false
+
+- include_tasks: package_apk.yml
+  with_dict:
+    base64: coreutils-base64
+    md5sum: coreutils-md5sum
+    sha1sum: coreutils-sha1sum
+  when: _openssl.rc != 0
+
+- name: avoid re-checking of packages
+  set_fact:
+    openwrt_install_recommended_packages: false
